@@ -8,6 +8,13 @@ pipeline {
 
     stages {
 
+        stage('Wipe Workspace') {
+            steps {
+                echo "Cleaning Jenkins workspace..."
+                deleteDir()
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -16,40 +23,16 @@ pipeline {
             }
         }
 
-        stage('Kill All Java') {
+        stage('Kill Java') {
             steps {
                 powershell '''
-                    Write-Host "Killing all Java processes..."
-                    Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                    Get-Process java -ErrorAction SilentlyContinue |
+                    Stop-Process -Force -ErrorAction SilentlyContinue
                 '''
             }
         }
 
-        stage('Unlock & Delete Target') {
-            steps {
-                powershell '''
-                    Write-Host "Deleting target directory with retries..."
-                    $dir = "target"
-                    $max = 10
-
-                    for ($i = 1; $i -le $max; $i++) {
-                        if (!(Test-Path $dir)) { break }
-
-                        try {
-                            Remove-Item -Recurse -Force -ErrorAction Stop $dir
-                            Write-Host "Target deleted."
-                            break
-                        }
-                        catch {
-                            Write-Host "Attempt $i failed. Retrying..."
-                            Start-Sleep -Seconds 2
-                        }
-                    }
-                '''
-            }
-        }
-
-        stage('Build Application') {
+        stage('Build') {
             steps {
                 bat "mvn clean package -DskipTests"
             }
@@ -61,12 +44,6 @@ pipeline {
                     Start-Process "java" "-jar target/todo-app-1.0.0.jar" -WindowStyle Hidden
                 '''
             }
-        }
-    }
-
-    post {
-        failure {
-            echo "Pipeline failed!"
         }
     }
 }
