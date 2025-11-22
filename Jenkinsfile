@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     tools {
         maven 'Maven3'
         jdk 'JAVA_HOME'
@@ -13,10 +13,10 @@ pipeline {
                 git branch: 'main',
                     credentialsId: 'JenkinsPavanAdmin',
                     url: 'https://github.com/KavaliPavanKumar/todo-app.git'
+            }
         }
-    }
 
-        stage('Force Stop Java Locks') {
+        stage('Kill All Java') {
             steps {
                 powershell '''
                     Write-Host "Killing all Java processes..."
@@ -25,26 +25,39 @@ pipeline {
             }
         }
 
-        stage('Build Application') {
+        stage('Unlock & Delete Target') {
             steps {
-                echo "Building the Spring Boot application..."
-                bat "mvn clean package -DskipTests"
+                powershell '''
+                    Write-Host "Deleting target directory with retries..."
+                    $dir = "target"
+                    $max = 10
+
+                    for ($i = 1; $i -le $max; $i++) {
+                        if (!(Test-Path $dir)) { break }
+
+                        try {
+                            Remove-Item -Recurse -Force -ErrorAction Stop $dir
+                            Write-Host "Target deleted."
+                            break
+                        }
+                        catch {
+                            Write-Host "Attempt $i failed. Retrying..."
+                            Start-Sleep -Seconds 2
+                        }
+                    }
+                '''
             }
         }
 
-        stage('Stop Old Application') {
+        stage('Build Application') {
             steps {
-                powershell '''
-                    Write-Host "Stopping previous instance..."
-                    Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-                '''
+                bat "mvn clean package -DskipTests"
             }
         }
 
         stage('Start Application') {
             steps {
                 powershell '''
-                    Write-Host "Starting new version..."
                     Start-Process "java" "-jar target/todo-app-1.0.0.jar" -WindowStyle Hidden
                 '''
             }
@@ -53,7 +66,7 @@ pipeline {
 
     post {
         failure {
-            echo "Pipeline failed. Please check logs."
+            echo "Pipeline failed!"
         }
     }
 }
