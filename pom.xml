@@ -8,7 +8,6 @@
     <groupId>com.example</groupId>
     <artifactId>todo-app</artifactId>
     <version>1.0.0</version>
-    <name>todo-app</name>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -18,59 +17,38 @@
 
     <properties>
         <java.version>17</java.version>
-        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
     </properties>
 
     <dependencies>
 
-        <!-- SPRING WEB -->
+        <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JSP SUPPORT -->
+        <!-- JSP Support -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
         </dependency>
 
-        <!-- Servlet API -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+        </dependency>
+
     </dependencies>
-
-    <build>
-        <plugins>
-
-            <!-- FIX: Force Maven to delete locked files -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven-clean-plugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${project.build.directory}</directory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <!-- Spring Boot Plugin -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>
