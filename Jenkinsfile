@@ -1,56 +1,58 @@
 pipeline {
-    agent any
+agent any
 
-    tools {
-        jdk 'JAVA_HOME'
-        maven 'Maven3'
-    }
+```
+tools {
+    jdk 'JAVA_HOME'
+    maven 'Maven3'
+}
 
-    stages {
+stages {
 
-        stage('Checkout Code') {
-            steps {
-                echo "Pulling source code from Git..."
-                git branch: 'main', url: 'https://github.com/KavaliPavanKumar/todo-app.git'
-            }
-        }
-
-        stage('Build Application') {
-            steps {
-                echo "Building Java Application..."
-                bat 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Stop Old Application') {
-            steps {
-                echo "Stopping old application if running..."
-
-                // Working Windows method to kill java process running todo-app
-                bat '''
-                echo Searching for old todo-app process...
-
-                for /f "tokens=2 delims==" %%a in ('
-                    wmic process where "name='java.exe'" get ProcessId^,CommandLine /value ^| findstr /i "todo-app"
-                ') do (
-                    echo Killing Java Process: %%a
-                    taskkill /F /PID %%a
-                )
-
-                echo If no PIDs above, no old process was running.
-                '''
-            }
-        }
-
-        stage('Start Application') {
-            steps {
-                echo "Starting new application..."
-                bat '''
-                echo Launching todo-app...
-                start "" java -jar target\\todo-app-0.0.1-SNAPSHOT.jar
-                echo Application started successfully!
-                '''
-            }
+    stage('Checkout Code') {
+        steps {
+            echo "Pulling source code from Git..."
+            git branch: 'main', url: 'https://github.com/KavaliPavanKumar/todo-app.git'
         }
     }
+
+    stage('Stop Old Application') {
+        steps {
+            echo "Stopping old todo-app if running..."
+            bat '''
+            echo Searching for old todo-app Java processes...
+            for /f "tokens=2 delims=," %%i in ('tasklist /FI "IMAGENAME eq java.exe" /FO CSV /V ^| findstr "todo-app"') do (
+                echo Killing Java Process: %%i
+                taskkill /F /PID %%i
+            )
+            echo Done checking old processes.
+            '''
+        }
+    }
+
+    stage('Build Application') {
+        steps {
+            echo "Building Java Application..."
+            bat 'mvn clean package -DskipTests'
+        }
+    }
+
+    stage('Start Application') {
+        steps {
+            echo "Starting new todo-app..."
+            bat 'start "" java -jar target\\todo-app-1.0.0.jar'
+        }
+    }
+}
+
+post {
+    failure {
+        echo "Pipeline failed. Please check the logs."
+    }
+    success {
+        echo "Pipeline completed successfully!"
+    }
+}
+```
+
 }
