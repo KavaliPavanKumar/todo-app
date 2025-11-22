@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = tool 'JDK17'
+        JAVA_HOME = tool 'JAVA_HOME'
         MAVEN_HOME = tool 'Maven3'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}"
         APP_JAR = "todo-app-1.0.0.jar"
