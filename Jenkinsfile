@@ -1,7 +1,7 @@
 pipeline {
 agent any
 
-```
+
 tools {
     jdk 'JAVA_HOME'
     maven 'Maven3'
@@ -53,6 +53,6 @@ post {
         echo "Pipeline completed successfully!"
     }
 }
-```
+
 
 }
