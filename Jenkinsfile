@@ -16,20 +16,22 @@ pipeline {
         }
 
         stage('Stop Old Application') {
-            steps {
-                echo "Stopping old todo-app if running..."
-                bat '''
-                echo Searching for old todo-app Java processes...
+    steps {
+        echo "Stopping old todo-app if running..."
+        bat '''
+        echo Searching for todo-app JAR process...
 
-                for /f "tokens=2 delims=," %%i in ('wmic process where "CommandLine like \\'%todo-app-1.0.0.jar%\\'" get ProcessId /format:csv ^| findstr /r "[0-9]"') do (
-                    echo Killing Java Process: %%i
-                    taskkill /F /PID %%i
-                )
+        for /f "tokens=2 delims=," %%i in ('
+            tasklist /FI "IMAGENAME eq java.exe" /FO CSV /V ^| findstr /I "todo-app-1.0.0.jar"
+        ') do (
+            echo Killing Java PID: %%i
+            taskkill /F /PID %%i
+        )
 
-                echo Done checking old processes.
-                '''
-            }
-        }
+        echo Done checking old processes.
+        '''
+    }
+}
 
         stage('Build Application') {
             steps {
